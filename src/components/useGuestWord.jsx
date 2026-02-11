@@ -1,35 +1,60 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { WORD_LIST } from "./WordList";
 
 export const useGuestWord = () => {
-    const [solution, setSolution] = useState(""); 
-    const [guesses, setGuesses] = useState(Array(6).fill(""));
+    const [solution, setSolution] = useState("");
+    const [guesses, setGuesses] = useState(Array(6).fill(null)); 
     const [turn, setTurn] = useState(0);
     const [currentGuess, setCurrentGuess] = useState("");
     const [isGameOver, setIsGameOver] = useState(false);
 
-    const initGame = () => {
+    const initGame = useCallback(() => {
         const randomWord = WORD_LIST[Math.floor(Math.random() * WORD_LIST.length)];
         setSolution(randomWord.toUpperCase());
-        setGuesses(Array(6).fill(""));
+        setGuesses(Array(6).fill(null));
         setTurn(0);
         setCurrentGuess("");
         setIsGameOver(false);
-    };
+    }, []);
 
     useEffect(() => {
-        initGame
-    }, []);
+        initGame();
+    }, [initGame]);
 
     useEffect(() => {
         const handleKeyUp = ({ key }) => {
             if (isGameOver) return;
 
             if (key === "Enter") {
-                if (currentGuess.length < 5) return alert("Vui lòng nhập đủ 5 chữ cái!!!");
+                if (currentGuess.length < 5) {
+                    return alert("Vui lòng nhập đủ 5 chữ cái!!!");
+                }
+
+                const solutionArray = [...solution];
+                const guessArray = [...currentGuess.toUpperCase()];
+                const statuses = Array(5).fill("gray");
+
+                guessArray.forEach((char, i) => {
+                    if (char === solutionArray[i]) {
+                        statuses[i] = "green";
+                        solutionArray[i] = null; 
+                    }
+                });
+
+                guessArray.forEach((char, i) => {
+                    if (statuses[i] !== "green" && solutionArray.includes(char)) {
+                        statuses[i] = "yellow";
+                        solutionArray[solutionArray.indexOf(char)] = null;
+                    }
+                });
+
+                const formattedGuess = guessArray.map((char, i) => ({ 
+                    key: char, 
+                    status: statuses[i] 
+                }));
 
                 const newGuesses = [...guesses];
-                newGuesses[turn] = currentGuess.toUpperCase();
+                newGuesses[turn] = formattedGuess;
 
                 setGuesses(newGuesses);
 

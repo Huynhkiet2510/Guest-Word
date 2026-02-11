@@ -1,1 +1,1 @@
-export const WORD_LIST = ["REACT", "APPLE", "PIZZA", "SMART", "CLOUD"];
+export const WORD_LIST = ["REACT", "APPLE", "PIZZA", "SMART", "CLOUD", "TABLE"];
